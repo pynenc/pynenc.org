@@ -21,6 +21,9 @@ author: Jose Diaz
 # Github repository
 repository: pynenc/pynenc.org
 
+# Base url, in this case pynenc.org should be root
+baseurl: "/" 
+
 ###############################################
 # --- List of links in the navigation bar --- #
 ###############################################
@@ -319,7 +322,6 @@ plugins:
 # email: your-email@example.com
 # description: >- # this means to ignore newlines until "baseurl:"
 #   A simple task management system for complex distributed orchestration.
-baseurl: "/" # the subpath of your site, e.g. /blog
 # url: "" # the base hostname & protocol for your site, e.g. http://example.com
 # twitter_username: pynenc
 # github_username:  pynenc

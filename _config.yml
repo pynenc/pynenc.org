@@ -22,7 +22,7 @@ author: Jose Diaz
 repository: pynenc/pynenc.org
 
 # Base url, in this case pynenc.org should be root
-baseurl: "/" 
+# baseurl: "/" 
 
 ###############################################
 # --- List of links in the navigation bar --- #
@@ -32,7 +32,7 @@ navbar-links:
   # About Me: "aboutme"
   Resources:
     - Pynenc docs: "https://docs.pynenc.org/"
-    - Pynenc repo: "https://github.com/pynenc/"
+    - Pynenc repo: "https://github.com/pynenc/pynenc"
   # Author's home: "https://deanattali.com"
 
 
@@ -133,7 +133,7 @@ edit_page_button: true
 navbar-var-length: false
 
 # The keywords to associate with your website, for SEO purposes
-#keywords: "my,list,of,keywords"
+keywords: "python,orchestration,distributed systems,task management,pynenc"
 
 
 ######################################

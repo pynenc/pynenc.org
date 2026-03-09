@@ -96,7 +96,7 @@ img.shroom-accent:hover {
   line-height: 1.6;
 }
 .oss-callout strong {
-  color: #2e7d32;
+  color: #2e7d32; /* keep green for OSS/MIT callout */
 }
 
 /* ── Feature grid  ──────────────────────────── */

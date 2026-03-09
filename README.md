@@ -1,61 +1,70 @@
-# Pynenc.org Landing Page
+# pynenc.org
 
-## Overview
-
-This repository contains the source code for the landing page of the `pynenc` project, hosted at [pynenc.org](https://pynenc.org). It is built with Jekyll, a static site generator, and deployed using GitHub Actions.
+Source for the [pynenc.org](https://pynenc.org) landing page — built with [Jekyll](https://jekyllrb.com) and the [Beautiful Jekyll](https://beautifuljekyll.com) theme, deployed automatically to GitHub Pages on every push to `main`.
 
 ## Prerequisites
 
-- Ruby (version as specified in `.ruby-version`)
+- Ruby ≥ 3.2 (`brew install ruby` on macOS, or use `rbenv`/`asdf`)
 - Bundler (`gem install bundler`)
-- Jekyll (`gem install jekyll`)
-- Git
 
-## Setting Up for Local Development
+## Quick start
 
-1. **Clone the Repository**:  
-   `git clone https://github.com/pynenc/pynenc.org.git`
-2. **Navigate to the Directory**:  
-   `cd pynenc.org`
-3. **Install Dependencies**:  
-   `bundle install`
+```sh
+make install   # bundle install
+make serve     # jekyll serve --livereload → opens http://localhost:4000
+```
 
-## Running Locally
+## Makefile targets
 
-To run the website on your local machine:
+| Target              | Description                                        |
+| ------------------- | -------------------------------------------------- |
+| `make install`      | Install Ruby dependencies                          |
+| `make serve`        | Serve locally with live-reload (opens browser)     |
+| `make serve-drafts` | Serve including unpublished draft posts            |
+| `make build`        | Production build into `_site/`                     |
+| `make clean`        | Remove `_site/` and Jekyll caches                  |
+| `make update`       | Update all gems to latest compatible versions      |
+| `make check`        | Run `jekyll doctor` to diagnose config issues      |
+| `make open`         | Open `http://localhost:4000` in your browser       |
 
-1. **Start Jekyll Server**:  
-   `bundle exec jekyll serve`
-2. **Access Local Server**:  
-   Open `http://localhost:4000` in your browser.
+## Project layout
 
-## Testing Your Changes
+```
+_config.yml          # Site-wide settings (theme, nav, colours, social links)
+index.markdown       # Main landing page content
+about.markdown       # About page
+_posts/              # Blog posts (YYYY-MM-DD-title.markdown)
+assets/img/          # Images (logo, avatar)
+.github/workflows/   # GitHub Actions CI/CD
+Makefile             # Local development shortcuts
+Gemfile              # Ruby dependencies (github-pages gem)
+```
 
-- Before committing your changes, run `bundle exec jekyll build` to build the site and check for any build errors.
+## Making changes
 
-## Cross-Platform Development
+- **Landing page** — edit [`index.markdown`](index.markdown)
+- **Site settings** (title, colours, nav, social links) — edit [`_config.yml`](_config.yml)
+- **About page** — edit [`about.markdown`](about.markdown)
+- **Blog posts** — add `_posts/YYYY-MM-DD-your-title.markdown`
 
-- If you are developing across different operating systems, run `bundle lock --add-platform x86_64-linux` to ensure compatibility.
+## Deployment
 
-## Updating Dependencies
+Every push to `main` triggers the [GitHub Actions workflow](.github/workflows/jekyll.yml), which builds and deploys to GitHub Pages automatically.
 
-- To update to the latest versions of dependencies, run `bundle update`.
+Test a production build locally before pushing:
 
-## Making Changes
+```sh
+make build
+```
 
-- **Content**: To add or edit content, modify the Markdown files in the `_posts` directory.
-- **Styling**: Update the CSS files within the `assets/css` directory.
-- **Configuration**: Adjust site-wide settings in `_config.yml`.
+## Updating dependencies
 
-## Testing Your Changes
+```sh
+make update   # bundle update — upgrades github-pages and all gems
+```
 
-- Ensure your changes render correctly locally.
-- Run `bundle exec jekyll build` to build the site and check for any build errors.
-
-## Deploying Changes
-
-Changes pushed to the `main` branch are automatically deployed via GitHub Actions as specified in `.github/workflows/jekyll.yml`.
+After updating, run `make build` to confirm nothing is broken, then commit the updated `Gemfile.lock`.
 
 ## License
 
-This project is licensed under BSD 3-Clause License. See the [LICENSE](LICENSE) file for more details.
+BSD 3-Clause — see [LICENSE](LICENSE).

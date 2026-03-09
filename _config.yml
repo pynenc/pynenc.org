@@ -42,10 +42,13 @@ navbar-links:
 
 # Image to show in the navigation bar - works best with a square image
 # Remove this parameter if you don't want an image in the navbar
-avatar: "/assets/img/avatar-icon.png"
+avatar: "/assets/img/pynenc_logo.png"
 
 # By default, the image is cut into a circle. You can disable this behaviour by setting 'round-avatar: false'
-round-avatar: true
+round-avatar: false
+
+# Favicon shown in the browser tab
+favicon: "/assets/img/favicon-32x32.png"
 
 # If you want to have an image logo in the top-left corner instead of having the title of the website,
 # then specify the following parameter
@@ -66,6 +69,7 @@ social-network-links:
   # facebook: deanattali
   github: pynenc
   twitter: pynenc
+  # x: pynenc  # uncomment if you prefer the X (formerly Twitter) icon
   # patreon: DeanAttali
   # youtube: c/daattali
 #  medium: yourname
@@ -103,9 +107,8 @@ rss-description: A task management system for complex distributed orchestration
 # Select which social network share links to show in posts
 share-links-active:
   twitter: true
-  facebook: true
+  facebook: false
   linkedin: true
-  twitter: true
   vk: false
 
 # How to display the link to your website in the footer
@@ -165,12 +168,12 @@ footer-hover-col: "#0085A1"
 #mobile-theme-col: "#0085A1"
 
 # For any extra visual customization, you can include additional CSS files in every page on your site. List any custom CSS files here
-#site-css:
-#  - "/assets/css/custom-styles.css"
+site-css:
+  - "/assets/css/custom-styles.css"
 
 # If you have common JavaScript files that should be included in every page, list them here
-#site-js:
-#  - "/assets/js/custom-script.js"
+site-js:
+  - "/assets/js/custom-nav.js"
 
 
 
@@ -303,7 +306,10 @@ exclude:
   - Gemfile
   - Gemfile.lock
   - LICENSE
+  - Makefile
   - README.md
+  - beautiful-jekyll-theme.gemspec
+  - pynenc_logo.png
   - screenshot.png
   - docs/
   - vendor/
@@ -314,24 +320,4 @@ plugins:
 
 
 
-#####################################
-# --- OLDER CONFIG BELOW: Jenkins   #
-#####################################
 
-
-# email: your-email@example.com
-# description: >- # this means to ignore newlines until "baseurl:"
-#   A task management system for complex distributed orchestration.
-# url: "" # the base hostname & protocol for your site, e.g. http://example.com
-# twitter_username: pynenc
-# github_username:  pynenc
-
-# lang: en
-# permalink: pretty
-
-
-# fixed_navbar: top
-
-# remote_theme: daattali/beautiful-jekyll@6.0.1
-# plugins:
-#   - jekyll-feed

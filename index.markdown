@@ -1,98 +1,192 @@
 ---
 title: Pynenc
-subtitle: A task management system for complex distributed orchestration
+subtitle: Distributed task orchestration for Python
 layout: page
-callouts: home_callouts
-show_sidebar: true
 ---
 
-# Pynenc Project
-![release date](https://img.shields.io/github/release-date-pre/pynenc/pynenc)
-![pypi version](https://img.shields.io/pypi/v/pynenc)
-![total commit activity](https://img.shields.io/github/commit-activity/t/pynenc/pynenc)
-![pypi supported python](https://img.shields.io/pypi/pyversions/pynenc.svg)
-![read the docs](https://img.shields.io/readthedocs/pynenc)
-![GitHub issues](https://img.shields.io/github/issues/pynenc/pynenc)
-![GitHub license](https://img.shields.io/github/license/pynenc/pynenc)
-![GitHub last commit](https://img.shields.io/github/last-commit/pynenc/pynenc)
-![GitHub contributors](https://img.shields.io/github/contributors/pynenc/pynenc)
-![GitHub Repo stars](https://img.shields.io/github/stars/pynenc/pynenc)
-![GitHub forks](https://img.shields.io/github/forks/pynenc/pynenc)
+<div class="badges">
+<img alt="pypi version" src="https://img.shields.io/pypi/v/pynenc">
+<img alt="python" src="https://img.shields.io/pypi/pyversions/pynenc.svg">
+<img alt="docs" src="https://img.shields.io/readthedocs/pynenc">
+<img alt="license" src="https://img.shields.io/github/license/pynenc/pynenc">
+<img alt="stars" src="https://img.shields.io/github/stars/pynenc/pynenc">
+<img alt="last commit" src="https://img.shields.io/github/last-commit/pynenc/pynenc">
+</div>
 
-Pynenc is a powerful yet simple-to-use task management system designed for complex distributed orchestration in Python. It provides a streamlined way to manage and execute tasks across distributed systems, ensuring efficiency and scalability.
+Pynenc is a Python distributed task system built around the problems other task frameworks leave for you to solve: lost tasks, duplicate work, dependency deadlocks, and failures you can't debug<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
 
-## Key Features
-- **Easy to Use**: Set up and run distributed tasks with minimal configuration.
-- **Scalable**: Efficiently manages tasks across multiple nodes in a distributed system.
-- **Flexible**: Suitable for a wide range of distributed computing tasks.
+<div class="oss-callout">
+<img class="shroom-float-right" src="/assets/img/pynenc_logo.png" alt="">
+<strong>100% open source. No strings attached.</strong><br>
+No paid cloud edition, no premium tier, no enterprise upsell. Core, plugins, and monitoring are MIT-licensed.
+</div>
 
-## Quick Start Example
+## What Pynenc solves
 
-To get started with Pynenc, here's a simple example that demonstrates the creation of a distributed task for adding two numbers. Follow these steps to quickly set up a basic task and execute it.
+### 1. Tasks disappear when workers crash
 
-1. **Define a Task**: Create a file named `tasks.py` and define a simple addition task:
+**Pynenc tracks every invocation through a strict state machine** with ownership semantics and runner heartbeats. Dead runners are detected automatically; orphaned invocations are reclaimed and re-routed<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
 
-   ```python
-   from pynenc import Pynenc
+### 2. Duplicate work runs in parallel
 
-   app = Pynenc()
+**Built-in concurrency control** with four modes: `DISABLED`, `TASK` (one per task), `ARGUMENTS` (one per unique args), `KEYS` (one per arbitrary key). Duplicates are rejected before reaching a worker.
 
-   @app.task
-   def add(x: int, y: int) -> int:
-       add.logger.info(f"{add.task_id=} Adding {x} + {y}")
-       return x + y
-   ```
+### 3. Dependencies deadlock your workers
 
-2. **Start Your Runner or Run Synchronously:**
+Task A waits on B, B waits on C, all workers blocked. **Pynenc's orchestrator pauses waiting tasks to free their slots**, then **prioritizes by dependency count** — the task blocking the most others runs first. Dependency chains resolve without holding threads hostage.
 
-   Before executing the task, decide if you want to run it asynchronously with a runner or synchronously for testing or development purposes.
+### 4. Failures are impossible to debug
 
-   - **Asynchronously:**
-     Start a runner in a separate terminal or script:
-     ```bash
-     pynenc --app=tasks.app runner start
-     ```
-     Check for the [basic_redis_example](https://github.com/pynenc/samples/tree/main/basic_redis_example)
+**Pynmon** (built-in monitoring UI) provides SVG timelines showing when each invocation started, paused, resumed, and finished across all runners. Family trees show parent-child relationships. The log explorer turns raw logs into clickable cross-references.
 
-   - **Synchronously:**
-     For test or local demonstration, to try synchronous execution, you can set the environment variable `PYNENC__DEV_MODE_FORCE_SYNC_TASKS=True` to force tasks to run in the same thread.
+### 5. Switching backends requires rewriting code
 
-3. **Execute the Task:**
+**Plugin architecture.** Core ships with memory and SQLite. Redis, MongoDB, and RabbitMQ install as separate packages. Swap by config, not code.
 
-   ```python
-   result = add(1, 2).result
-   print(result)  # This will output the result of 1 + 2
-   ```
+<div class="shroom-divider"><img src="/assets/img/pynenc_logo.png" alt="~"></div>
 
-For a comprehensive overview of Pynenc's capabilities and more detailed examples, visit our [Usage Guide](https://docs.pynenc.org/en/latest/usage_guide/index.html) and the [samples library](https://github.com/pynenc/samples).
+## Quick start
 
-## Requirements
+```bash
+pip install pynenc
+```
 
-- **Redis**: As of now, Pynenc requires a Redis server to handle distributed task management. Ensure that you have Redis installed and running in your environment.
+```python
+from pynenc import Pynenc
 
-### Future Updates:
-- Pynenc is being developed to support additional databases and message queues. This will expand its compatibility and usability in various distributed systems.
+app = Pynenc()
 
-## Documentation
+@app.task
+def add(x: int, y: int) -> int:
+    return x + y
 
-For full instructions and more detailed information about Pynenc, please see our [Documentation](https://docs.pynenc.org).
+result = add(1, 2).result  # 3
+```
 
-## Contact or Support
+```bash
+pynenc --app=tasks.app runner start
+```
 
-If you need help with Pynenc or want to discuss any aspects of its usage, feel free to reach out through the following channels:
+<div class="disclaimer-box">
+<img class="shroom-sm" src="/assets/img/pynenc_logo.png" alt=""> <strong>Fine print:</strong> this runs in-memory on a single thread. For distributed execution, add a backend:
+<code>pip install pynenc-redis</code> / <code>pynenc-mongodb</code> / <code>pynenc-rabbitmq</code>
+</div>
 
-- **[GitHub Issues](https://github.com/pynenc/pynenc/issues)**: For bug reports, feature requests, or other technical queries, please use our GitHub Issues page. You can create a new issue or contribute to existing discussions.
+More in the [Usage Guide](https://docs.pynenc.org/en/latest/usage_guide/index.html) and [samples repo](https://github.com/pynenc/samples)<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
 
-- **[GitHub Discussions](https://github.com/pynenc/pynenc/discussions)**: For more general questions, ideas exchange, or discussions about Pynenc, consider using GitHub Discussions on our repository. It's a great place to connect with other users and the development team.
+<div class="shroom-divider"><img src="/assets/img/pynenc_logo.png" alt="~"></div>
 
-Remember, your feedback and contributions are essential in helping Pynenc grow and improve!
+## Under the hood <img class="shroom-sm" src="/assets/img/pynenc_logo.png" alt="">
 
-## Contribute
+**Invocation state machine** — Every task call becomes an invocation moving through `REGISTERED → PENDING → RUNNING → SUCCESS/FAILED`. Transitions are enforced; each change is recorded with timestamps and ownership metadata.
 
-Pynenc is an open-source project, and we welcome contributions of all kinds. Check out our [GitHub repository](https://github.com/pynenc/pynenc) to get involved!
+**Recovery** — Runners send heartbeats. A background atomic service detects dead runners and invocations stuck beyond configured thresholds. Orphaned work is reclaimed under a distributed lock.
 
-## License
+**Concurrency control** — Before reaching a worker, the orchestrator checks the task's concurrency policy and rejects or queues duplicates at the orchestration layer.
 
-Pynenc is released under the [MIT License](https://github.com/pynenc/pynenc/blob/main/LICENSE).
+**Workflows** — Multi-step workflows with result persistence. On replay, completed steps are skipped. Failed workflows resume from the last checkpoint.
 
+<div class="shroom-divider"><img src="/assets/img/pynenc_logo.png" alt="~"></div>
 
+## Features <img class="shroom-sm" src="/assets/img/pynenc_logo.png" alt="">
+
+<div class="feature-grid">
+<div class="feature-card">
+<h4>🔌 Plugin Architecture</h4>
+<p>Memory &amp; SQLite built-in. Redis, MongoDB, RabbitMQ as separate packages.</p>
+</div>
+<div class="feature-card">
+<h4>🔄 Auto Orchestration</h4>
+<p>Waiting tasks are paused, slots freed. Highest-dependency tasks run first. No deadlocks.</p>
+</div>
+<div class="feature-card">
+<h4>🚦 Concurrency Control</h4>
+<p>Four modes prevent duplicate work before it reaches a worker.</p>
+</div>
+<div class="feature-card">
+<h4>📊 Monitoring (Pynmon)</h4>
+<p>SVG timelines, family trees, log explorer, runner dashboards, workflow tracking.</p>
+</div>
+<div class="feature-card">
+<h4>⚡ Workflows</h4>
+<p>Deterministic replay, checkpoint persistence, resume from failure.</p>
+</div>
+<div class="feature-card">
+<h4>🔒 Recovery</h4>
+<p>Heartbeats + dead runner detection. Orphaned invocations reclaimed automatically.</p>
+</div>
+<div class="feature-card">
+<h4>⏰ Triggers</h4>
+<p>Cron, events, task-status — composable with AND/OR logic.</p>
+</div>
+<div class="feature-card">
+<h4>🔍 Debuggability</h4>
+<p>Every state transition recorded. Logs correlate to invocations, runners, tasks.</p>
+</div>
+</div>
+
+<div class="shroom-divider"><img src="/assets/img/pynenc_logo.png" alt="~"></div>
+
+## Plugin system <img class="shroom-sm" src="/assets/img/pynenc_logo.png" alt="">
+
+| Plugin | Package | Provides |
+|---|---|---|
+| Redis | `pynenc-redis` | Broker, Orchestrator, State Backend, Trigger |
+| MongoDB | `pynenc-mongodb` | Broker, Orchestrator, State Backend, Trigger |
+| RabbitMQ | `pynenc-rabbitmq` | Broker |
+
+```python
+from pynenc.builder import PynencBuilder
+
+app = (
+    PynencBuilder()
+    .app_id("my_app")
+    .redis(url="redis://localhost:6379")
+    .multi_thread_runner(min_threads=2, max_threads=8)
+    .build()
+)
+```
+
+## Monitoring with Pynmon <img class="shroom-sm" src="/assets/img/pynenc_logo.png" alt="">
+
+Built-in web UI for when scattered container logs aren't cutting it.
+
+```bash
+pynenc --app=tasks.app monitor --host 0.0.0.0 --port 8000
+```
+
+<img class="shroom-float-right" src="/assets/img/pynenc_logo.png" alt="">
+
+- **Dashboard** — component overview, queue depth, invocation counts, runner status
+- **Timeline** — SVG visualization of invocation lifetimes across runners
+- **Family Tree** — interactive parent-child invocation hierarchies
+- **Log Explorer** — paste raw logs, get clickable cross-references and mini-timelines
+- **Runners** — heartbeat status, config, hostname, PID, uptime
+- **Workflows** — multi-step progress tracking with failure points
+
+<!-- TODO: Add Pynmon demo GIF here -->
+
+## Trigger system
+
+```python
+trigger = app.trigger.on_success(process_data).run(notify_admin)
+
+scheduled = app.trigger.on_cron("*/30 * * * *").run(process_data, ...)
+```
+
+<div class="shroom-divider"><img src="/assets/img/pynenc_logo.png" alt="~"></div>
+
+## Status <img class="shroom-sm" src="/assets/img/pynenc_logo.png" alt="">
+
+**Beta** (v0.1.x). Core systems are functional and tested. API may change between minor versions.
+
+Full [Changelog](https://docs.pynenc.org/en/latest/changelog.html)<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
+
+## Links
+
+- **Docs**: [docs.pynenc.org](https://docs.pynenc.org)
+- **Source**: [github.com/pynenc/pynenc](https://github.com/pynenc/pynenc)
+- **Issues**: [GitHub Issues](https://github.com/pynenc/pynenc/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/pynenc/pynenc/discussions)
+
+Contributions welcome<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt=""> MIT License<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">

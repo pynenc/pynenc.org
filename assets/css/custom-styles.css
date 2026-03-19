@@ -2,6 +2,22 @@
    pynenc.org  —  custom styles
    ────────────────────────────────────────────── */
 
+/* ── Navbar mushroom collection ─────────────────
+   Sits between the brand and the navlinks inside
+   the Bootstrap collapse flex row. */
+.shroom-collection {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 4px;
+  flex: 1;          /* fill space between brand and navlinks */
+  min-width: 0;     /* allow shrinking */
+  overflow: hidden;
+  padding: 0 10px;
+  pointer-events: none;
+}
+
+
 /* ── Navbar brand mushroom (appears on scroll) ─ */
 .brand-shroom {
   display: inline-block;

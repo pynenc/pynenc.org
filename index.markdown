@@ -80,11 +80,9 @@ More in the [Usage Guide](https://docs.pynenc.org/en/latest/usage_guide/index.ht
 
 **Invocation state machine** — Every task call becomes an invocation moving through `REGISTERED → PENDING → RUNNING → SUCCESS/FAILED`. Transitions are enforced; each change is recorded with timestamps and ownership metadata.
 
-**Recovery** — Runners send heartbeats. A background atomic service detects dead runners and invocations stuck beyond configured thresholds. Orphaned work is reclaimed under a distributed lock.
+**Recovery** — Runners emit heartbeats. A background atomic service detects dead runners and invocations stuck beyond configured thresholds. Orphaned work is reclaimed under a distributed lock and re-queued transparently.
 
-**Concurrency control** — Before reaching a worker, the orchestrator checks the task's concurrency policy and rejects or queues duplicates at the orchestration layer.
-
-**Workflows** — Multi-step workflows with result persistence. On replay, completed steps are skipped. Failed workflows resume from the last checkpoint.
+**Workflows** — Multi-step workflows with result persistence. On replay, completed steps are skipped; failed workflows resume from the last checkpoint, not from the start.
 
 <div class="shroom-divider"><img src="/assets/img/pynenc_logo.png" alt="~"></div>
 
@@ -149,7 +147,7 @@ app = (
 
 ## Monitoring with Pynmon <img class="shroom-sm" src="/assets/img/pynenc_logo.png" alt="">
 
-Built-in web UI for when scattered container logs aren't cutting it.
+A built-in web UI that gives real-time visibility into every invocation, runner, and workflow — no external tooling required.
 
 ```bash
 pynenc --app=tasks.app monitor --host 0.0.0.0 --port 8000
@@ -164,9 +162,10 @@ pynenc --app=tasks.app monitor --host 0.0.0.0 --port 8000
 - **Runners** — heartbeat status, config, hostname, PID, uptime
 - **Workflows** — multi-step progress tracking with failure points
 
-<!-- TODO: Add Pynmon demo GIF here -->
-
 ## Trigger system
+
+Tasks can start automatically based on cron schedules, custom events, or the outcome
+of other tasks. Triggers compose with AND/OR logic for complex automation flows.
 
 ```python
 trigger = app.trigger.on_success(process_data).run(notify_admin)
@@ -176,17 +175,12 @@ scheduled = app.trigger.on_cron("*/30 * * * *").run(process_data, ...)
 
 <div class="shroom-divider"><img src="/assets/img/pynenc_logo.png" alt="~"></div>
 
-## Status <img class="shroom-sm" src="/assets/img/pynenc_logo.png" alt="">
-
-**Beta** (v0.1.x). Core systems are functional and tested. API may change between minor versions.
-
-Full [Changelog](https://docs.pynenc.org/en/latest/changelog.html)<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
-
-## Links
+## Get involved <img class="shroom-sm" src="/assets/img/pynenc_logo.png" alt="">
 
 - **Docs**: [docs.pynenc.org](https://docs.pynenc.org)
 - **Source**: [github.com/pynenc/pynenc](https://github.com/pynenc/pynenc)
-- **Issues**: [GitHub Issues](https://github.com/pynenc/pynenc/issues)
+- **Issues & feedback**: [GitHub Issues](https://github.com/pynenc/pynenc/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/pynenc/pynenc/discussions)
+- **Changelog**: [docs.pynenc.org/changelog](https://docs.pynenc.org/en/latest/changelog.html)
 
-Contributions welcome<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt=""> MIT License<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
+**v0.1.x** — All core features are implemented and running in production. The codebase is young; you may hit rough edges. Bug reports and contributions are very welcome<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt=""> MIT License<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">

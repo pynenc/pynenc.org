@@ -39,6 +39,8 @@ Task A waits on B, B waits on C, all workers blocked. **Pynenc's orchestrator pa
 
 **Pynmon** (built-in monitoring UI) provides SVG timelines showing when each invocation started, paused, resumed, and finished across all runners. Family trees show parent-child relationships. The log explorer turns raw logs into clickable cross-references.
 
+<img src="/assets/img/pynmon_timeline.png" alt="Pynmon execution timeline showing task execution across multiple runners with status transitions" class="pynmon-screenshot lightbox-target">
+
 ### 5. Switching backends requires rewriting code
 
 **Plugin architecture.** Core ships with memory and SQLite. Redis, MongoDB, and RabbitMQ install as separate packages. Swap by config, not code.
@@ -153,14 +155,29 @@ A built-in web UI that gives real-time visibility into every invocation, runner,
 pynenc --app=tasks.app monitor --host 0.0.0.0 --port 8000
 ```
 
-<img class="shroom-float-right" src="/assets/img/pynenc_logo.png" alt="">
+<div class="pynmon-showcase" markdown="1">
 
-- **Dashboard** — component overview, queue depth, invocation counts, runner status
-- **Timeline** — SVG visualization of invocation lifetimes across runners
-- **Family Tree** — interactive parent-child invocation hierarchies
-- **Log Explorer** — paste raw logs, get clickable cross-references and mini-timelines
-- **Runners** — heartbeat status, config, hostname, PID, uptime
-- **Workflows** — multi-step progress tracking with failure points
+<img src="/assets/img/pynmon_dashboard.png" alt="Pynmon dashboard showing application overview, invocation status, component architecture, and configuration" class="pynmon-screenshot lightbox-target">
+
+### Execution Timeline
+
+See what ran across every runner and worker, at every moment. Status transitions are color-coded — orange for pending, green for completed, blue for running — with connections between parent and child invocations.
+
+<img src="/assets/img/pynenc_runners_timeline_detail.png" alt="Pynmon timeline comparing ThreadRunner, ProcessRunner, PersistentProcessRunner, and MultiThreadRunner" class="pynmon-screenshot lightbox-target">
+
+### Family Tree
+
+Navigate the full hierarchy of task calls as an interactive graph. Selecting a node cross-highlights it on the timeline, and vice versa.
+
+<img src="/assets/img/pynmon_family_tree.png" alt="Pynmon family tree overlaid on timeline with cross-highlighting between graph and execution view" class="pynmon-screenshot lightbox-target">
+
+### Log Explorer
+
+Paste your log lines and the Log Explorer augments them with full context — parsing runner contexts, invocation IDs, and task references, resolving each to its detail page with a mini-timeline.
+
+<img src="/assets/img/pynmon_log_explorer.png" alt="Pynmon Log Explorer parsing log lines with augmented context, mini-timeline, and links" class="pynmon-screenshot lightbox-target">
+
+</div>
 
 ## Trigger system
 

@@ -200,3 +200,47 @@ img.shroom-accent:hover {
   opacity: 1;
   transform: rotate(360deg);
 }
+
+/* ── Pynmon screenshot showcase ─────────────── */
+.pynmon-showcase {
+  margin: 1.5rem 0;
+}
+.pynmon-screenshot {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+  margin: 1.2rem 0 2rem;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+.pynmon-screenshot:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  transform: translateY(-2px);
+}
+.pynmon-screenshot.lightbox-target {
+  cursor: zoom-in;
+}
+
+/* ── Lightbox overlay ───────────────────────── */
+.lightbox-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.85);
+  justify-content: center;
+  align-items: center;
+  cursor: zoom-out;
+}
+.lightbox-overlay.active {
+  display: flex;
+}
+.lightbox-overlay img {
+  max-width: 95vw;
+  max-height: 95vh;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+}

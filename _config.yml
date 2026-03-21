@@ -178,6 +178,7 @@ site-css:
 site-js:
   - "/assets/js/custom-nav.js"
   - "/assets/js/shroom-scroll.js"
+  - "/assets/js/lightbox.js"
 
 
 

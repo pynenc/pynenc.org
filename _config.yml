@@ -33,9 +33,8 @@ url: "https://pynenc.org"
 
 navbar-links:
   # About Me: "aboutme"
-  Resources:
-    - Pynenc docs: "https://docs.pynenc.org/"
-    - Pynenc repo: "https://github.com/pynenc/pynenc"
+  "<i class='fas fa-book' aria-hidden='true'></i>&nbsp;Docs": "https://docs.pynenc.org/"
+  "<i class='fab fa-github' aria-hidden='true'></i>&nbsp;GitHub": "https://github.com/pynenc/pynenc"
   # Author's home: "https://deanattali.com"
 
 
@@ -128,7 +127,7 @@ feed_show_excerpt: true
 feed_show_tags: true
 
 # Add a search button to the navbar
-post_search: true
+post_search: false
 
 # Add a button in the footer to edit the current page. Only works if your website is hosted on GitHub
 edit_page_button: true

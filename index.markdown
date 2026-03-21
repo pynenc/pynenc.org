@@ -29,11 +29,11 @@ No paid cloud edition, no premium tier, no enterprise upsell. Core, plugins, and
 
 ### 2. Duplicate work runs in parallel
 
-**Built-in concurrency control** with four modes: `DISABLED`, `TASK` (one per task), `ARGUMENTS` (one per unique args), `KEYS` (one per arbitrary key). Duplicates are rejected before reaching a worker.
+**Built-in concurrency control** with four modes: `DISABLED`, `TASK` (one per task), `ARGUMENTS` (one per unique args), `KEYS` (one per arbitrary key). Duplicates are rejected before reaching a worker<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
 
 ### 3. Dependencies deadlock your workers
 
-Task A waits on B, B waits on C, all workers blocked. **Pynenc's orchestrator pauses waiting tasks to free their slots**, then **prioritizes by dependency count** — the task blocking the most others runs first. Dependency chains resolve without holding threads hostage.
+Task A waits on B, B waits on C, all workers blocked. **Pynenc's orchestrator pauses waiting tasks to free their slots**, then **prioritizes by dependency count** — the task blocking the most others runs first. Dependency chains resolve without holding threads hostage<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
 
 ### 4. Failures are impossible to debug
 
@@ -43,7 +43,7 @@ Task A waits on B, B waits on C, all workers blocked. **Pynenc's orchestrator pa
 
 ### 5. Switching backends requires rewriting code
 
-**Plugin architecture.** Core ships with memory and SQLite. Redis, MongoDB, and RabbitMQ install as separate packages. Swap by config, not code.
+**Plugin architecture.** Core ships with memory and SQLite. Redis, MongoDB, and RabbitMQ install as separate packages. Swap by config, not code<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
 
 <div class="shroom-divider"><img src="/assets/img/pynenc_logo.png" alt="~"></div>
 
@@ -82,7 +82,7 @@ More in the [Usage Guide](https://docs.pynenc.org/en/latest/usage_guide/index.ht
 
 **Invocation state machine** — Every task call becomes an invocation moving through `REGISTERED → PENDING → RUNNING → SUCCESS/FAILED`. Transitions are enforced; each change is recorded with timestamps and ownership metadata.
 
-**Recovery** — Runners emit heartbeats. A background atomic service detects dead runners and invocations stuck beyond configured thresholds. Orphaned work is reclaimed under a distributed lock and re-queued transparently.
+**Recovery** — Runners emit heartbeats. A background atomic service detects dead runners and invocations stuck beyond configured thresholds. Orphaned work is reclaimed under a distributed lock and re-queued transparently<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
 
 **Workflows** — Multi-step workflows with result persistence. On replay, completed steps are skipped; failed workflows resume from the last checkpoint, not from the start.
 
@@ -182,7 +182,7 @@ Paste your log lines and the Log Explorer augments them with full context — pa
 ## Trigger system
 
 Tasks can start automatically based on cron schedules, custom events, or the outcome
-of other tasks. Triggers compose with AND/OR logic for complex automation flows.
+of other tasks. Triggers compose with AND/OR logic for complex automation flows<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
 
 ```python
 trigger = app.trigger.on_success(process_data).run(notify_admin)

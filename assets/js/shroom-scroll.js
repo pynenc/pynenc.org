@@ -12,8 +12,10 @@
     ".shroom-divider img"
   ].join(", ");
 
-  /* Varied sizes (px) and rotations (deg) for the navbar tokens */
-  var SIZES = [16, 21, 14, 24, 18, 20, 13, 22, 17, 25, 15, 19];
+  /* Varied sizes (px) and rotations (deg) for the navbar tokens.
+     Arranged so odd indices (left side) and even indices (right side)
+     both get a balanced mix of large and small tokens. */
+  var SIZES = [20, 24, 23, 14, 15, 22, 21, 16, 17, 25, 19, 13];
   var ROTS  = [-10, 15, -18, 8, -12, 20, -6, 14, -22, 10, -15, 7];
 
   var pairMap = new WeakMap(); /* page img → pair */
@@ -29,7 +31,8 @@
     /* Shrink + fade out of page */
     pair.page.style.opacity = "0";
     pair.page.style.transform = "translateY(-10px) scale(0.2)";
-    /* Grow into navbar */
+    /* Grow into navbar — expand width so flex re-centers */
+    pair.nav.style.width = pair.size + "px";
     pair.nav.style.opacity = "1";
     pair.nav.style.transform = "scale(1) rotate(" + pair.rot + "deg)";
   }
@@ -40,7 +43,8 @@
     /* Restore page mushroom (remove inline overrides; CSS takes over) */
     pair.page.style.opacity = restingOpacity(pair.page);
     pair.page.style.transform = "";
-    /* Shrink out of navbar */
+    /* Collapse out of navbar — shrink width to zero so flex re-centers */
+    pair.nav.style.width = "0";
     pair.nav.style.opacity = "0";
     pair.nav.style.transform = "scale(0) rotate(" + pair.rot + "deg)";
   }
@@ -74,24 +78,38 @@
       /* Smooth transition so collect/uncollect animate */
       img.style.transition = "opacity 0.55s ease, transform 0.55s ease";
 
-      /* Navbar token — starts invisible */
+      /* Navbar token — starts invisible and zero-width so flex
+         re-centers as each mushroom grows in */
       var navImg = document.createElement("img");
       navImg.src = "/assets/img/pynenc_logo.png";
       navImg.alt = "";
       navImg.style.cssText = [
-        "width:"  + size + "px",
+        "width:0",
         "height:" + size + "px",
         "object-fit:contain",
         "opacity:0",
         "transform:scale(0) rotate(" + rot + "deg)",
-        "transition:opacity 0.5s ease, transform 0.5s ease",
-        "flex-shrink:0"
+        "transition:width 0.5s ease, opacity 0.5s ease, transform 0.5s ease",
+        "flex-shrink:0",
+        "overflow:hidden"
       ].join(";");
-      collection.appendChild(navImg);
 
-      var pair = { page: img, nav: navImg, rot: rot, collected: false };
+      var pair = { page: img, nav: navImg, rot: rot, size: size, collected: false };
       pairMap.set(img, pair);
       return pair;
+    });
+
+    /* Arrange tokens in center-out DOM order so the first collected
+       mushroom sits at the visual center, then they alternate
+       left / right outward:
+         DOM left-to-right: …, 5, 3, 1, 0, 2, 4, 6, … */
+    var left = [], right = [];
+    for (var j = 1; j < pairs.length; j++) {
+      if (j % 2 === 1) left.unshift(j); else right.push(j);
+    }
+    var domOrder = left.concat([0]).concat(right);
+    domOrder.forEach(function (idx) {
+      collection.appendChild(pairs[idx].nav);
     });
 
     /* One observer for all mushrooms.

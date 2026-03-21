@@ -8,6 +8,7 @@
 .shroom-collection {
   display: flex;
   align-items: center;
+  justify-content: center;
   flex-wrap: nowrap;
   gap: 4px;
   flex: 1;          /* fill space between brand and navlinks */
@@ -243,4 +244,16 @@ img.shroom-accent:hover {
   object-fit: contain;
   border-radius: 4px;
   box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+}
+
+/* ── Navbar icon links (Docs & GitHub) ───────── */
+.navbar-nav .nav-link i.fas,
+.navbar-nav .nav-link i.fab {
+  font-size: 1.05rem;
+  vertical-align: middle;
+  transition: transform 0.25s ease;
+}
+.navbar-nav .nav-link:hover i.fas,
+.navbar-nav .nav-link:hover i.fab {
+  transform: scale(1.25);
 }

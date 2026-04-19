@@ -1,1 +1,22 @@
-layout: blog
+---
+layout: page
+title: Publications
+subtitle: Engineering articles, reliability deep-dives, and release notes from Pynenc
+---
+
+{% assign publication_posts = site.posts | where_exp: "post", "post.categories contains 'publications'" %}
+
+<div class="publication-list" markdown="1">
+{% for post in publication_posts %}
+	<article class="publication-card">
+		<h3><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h3>
+		<p class="publication-meta">{{ post.date | date: site.date_format }}</p>
+		<p>{{ post.excerpt | strip_html | truncatewords: 42 }}</p>
+		<p><a href="{{ post.url | relative_url }}">Read article</a></p>
+	</article>
+{% endfor %}
+</div>
+
+{% if publication_posts == empty %}
+No publications yet. Check back soon.
+{% endif %}

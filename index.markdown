@@ -47,6 +47,33 @@ Task A waits on B, B waits on C, all workers blocked. **Pynenc's orchestrator pa
 
 <div class="shroom-divider"><img src="/assets/img/pynenc_logo.png" alt="~"></div>
 
+
+## What Pynenc solves
+
+### 1. Tasks disappear when workers crash
+
+**Pynenc tracks every invocation through a strict state machine** with ownership semantics and runner heartbeats. Dead runners are detected automatically; orphaned invocations are reclaimed and re-routed<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
+
+### 2. Duplicate work runs in parallel
+
+**Built-in concurrency control** with four modes: `DISABLED`, `TASK` (one per task), `ARGUMENTS` (one per unique args), `KEYS` (one per arbitrary key). Duplicates are rejected before reaching a worker<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
+
+### 3. Dependencies deadlock your workers
+
+Task A waits on B, B waits on C, all workers blocked. **Pynenc's orchestrator pauses waiting tasks to free their slots**, then **prioritizes by dependency count** — the task blocking the most others runs first. Dependency chains resolve without holding threads hostage<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
+
+### 4. Failures are impossible to debug
+
+**Pynmon** (built-in monitoring UI) provides SVG timelines showing when each invocation started, paused, resumed, and finished across all runners. Family trees show parent-child relationships. The log explorer turns raw logs into clickable cross-references.
+
+<img src="/assets/img/pynmon_timeline.png" alt="Pynmon execution timeline showing task execution across multiple runners with status transitions" class="pynmon-screenshot lightbox-target">
+
+### 5. Switching backends requires rewriting code
+
+**Plugin architecture.** Core ships with memory and SQLite. Redis, MongoDB, and RabbitMQ install as separate packages. Swap by config, not code<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
+
+<div class="shroom-divider"><img src="/assets/img/pynenc_logo.png" alt="~"></div>
+
 ## Quick start
 
 ```bash
@@ -123,6 +150,7 @@ More in the [Usage Guide](https://docs.pynenc.org/en/latest/usage_guide/index.ht
 <h4>🔍 Debuggability</h4>
 <p>Every state transition recorded. Logs correlate to invocations, runners, tasks.</p>
 </div>
+
 </div>
 
 <div class="shroom-divider"><img src="/assets/img/pynenc_logo.png" alt="~"></div>
@@ -200,4 +228,6 @@ scheduled = app.trigger.on_cron("*/30 * * * *").run(process_data, ...)
 - **Discussions**: [GitHub Discussions](https://github.com/pynenc/pynenc/discussions)
 - **Changelog**: [docs.pynenc.org/changelog](https://docs.pynenc.org/en/latest/changelog.html)
 
-**v0.1.x** — All core features are implemented and running in production. The codebase is young; you may hit rough edges. Bug reports and contributions are very welcome<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt=""> MIT License<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
+**Current stable release**
+<img alt="github release" src="https://img.shields.io/github/v/release/pynenc/pynenc?display_name=tag&sort=semver">
+— Version line is now 0.2.x (currently 0.2.1). Core features are implemented and in active use; reports and contributions are very welcome<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt=""> MIT License<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">

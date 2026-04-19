@@ -33,6 +33,7 @@ url: "https://pynenc.org"
 
 navbar-links:
   # About Me: "aboutme"
+  "<i class='fas fa-newspaper' aria-hidden='true'></i>&nbsp;Publications": "/blog"
   "<i class='fas fa-book' aria-hidden='true'></i>&nbsp;Docs": "https://docs.pynenc.org/"
   "<i class='fab fa-github' aria-hidden='true'></i>&nbsp;GitHub": "https://github.com/pynenc/pynenc"
   # Author's home: "https://deanattali.com"
@@ -108,9 +109,9 @@ rss-description: A task management system for complex distributed orchestration
 
 # Select which social network share links to show in posts
 share-links-active:
-  twitter: true
+  twitter: false
   facebook: false
-  linkedin: true
+  linkedin: false
   vk: false
 
 # How to display the link to your website in the footer
@@ -176,6 +177,11 @@ site-css:
 # If you have common JavaScript files that should be included in every page, list them here
 site-js:
   - "/assets/js/custom-nav.js"
+  - "/assets/js/social-x.js"
+  - "/assets/js/post-subheader.js"
+  - "/assets/js/publication-shrooms.js"
+  - "https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"
+  - "/assets/js/code-copy.js"
   - "/assets/js/shroom-scroll.js"
   - "/assets/js/lightbox.js"
 
@@ -296,7 +302,7 @@ defaults:
     values:
       layout: "post"
       comments: true  # add comments to all blog posts
-      social-share: true # add social media sharing buttons to all blog posts
+      social-share: false # post sharing buttons disabled; readers can copy URL directly
   -
     scope:
       path: "" # any file that's not a post will be a "page" layout by default

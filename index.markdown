@@ -13,10 +13,10 @@ layout: page
 <img alt="last commit" src="https://img.shields.io/github/last-commit/pynenc/pynenc">
 </div>
 
-Pynenc is a Python distributed task system built around the problems other task frameworks leave for you to solve: lost tasks, duplicate work, dependency deadlocks, and failures you can't debug<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
+Pynenc is a Python distributed task system built around the problems other task frameworks leave for you to solve: lost tasks, duplicate work, dependency deadlocks, and failures you can't debug<img class="shroom-dot" src="/assets/img/shared/pynenc_logo.png" alt="">
 
 <div class="oss-callout">
-<img class="shroom-float-right" src="/assets/img/pynenc_logo.png" alt="">
+<img class="shroom-float-right" src="/assets/img/shared/pynenc_logo.png" alt="">
 <strong>100% open source. No strings attached.</strong><br>
 No paid cloud edition, no premium tier, no enterprise upsell. Core, plugins, and monitoring are MIT-licensed.
 </div>
@@ -25,54 +25,54 @@ No paid cloud edition, no premium tier, no enterprise upsell. Core, plugins, and
 
 ### 1. Tasks disappear when workers crash
 
-**Pynenc tracks every invocation through a strict state machine** with ownership semantics and runner heartbeats. Dead runners are detected automatically; orphaned invocations are reclaimed and re-routed<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
+**Pynenc tracks every invocation through a strict state machine** with ownership semantics and runner heartbeats. Dead runners are detected automatically; orphaned invocations are reclaimed and re-routed<img class="shroom-dot" src="/assets/img/shared/pynenc_logo.png" alt="">
 
 ### 2. Duplicate work runs in parallel
 
-**Built-in concurrency control** with four modes: `DISABLED`, `TASK` (one per task), `ARGUMENTS` (one per unique args), `KEYS` (one per arbitrary key). Duplicates are rejected before reaching a worker<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
+**Built-in concurrency control** with four modes: `DISABLED`, `TASK` (one per task), `ARGUMENTS` (one per unique args), `KEYS` (one per arbitrary key). Duplicates are rejected before reaching a worker<img class="shroom-dot" src="/assets/img/shared/pynenc_logo.png" alt="">
 
 ### 3. Dependencies deadlock your workers
 
-Task A waits on B, B waits on C, all workers blocked. **Pynenc's orchestrator pauses waiting tasks to free their slots**, then **prioritizes by dependency count** — the task blocking the most others runs first. Dependency chains resolve without holding threads hostage<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
+Task A waits on B, B waits on C, all workers blocked. **Pynenc's orchestrator pauses waiting tasks to free their slots**, then **prioritizes by dependency count** — the task blocking the most others runs first. Dependency chains resolve without holding threads hostage<img class="shroom-dot" src="/assets/img/shared/pynenc_logo.png" alt="">
 
 ### 4. Failures are impossible to debug
 
 **Pynmon** (built-in monitoring UI) provides SVG timelines showing when each invocation started, paused, resumed, and finished across all runners. Family trees show parent-child relationships. The log explorer turns raw logs into clickable cross-references.
 
-<img src="/assets/img/pynmon_timeline.png" alt="Pynmon execution timeline showing task execution across multiple runners with status transitions" class="pynmon-screenshot lightbox-target">
+<img src="/assets/img/shared/pynmon_timeline.png" alt="Pynmon execution timeline showing task execution across multiple runners with status transitions" class="pynmon-screenshot lightbox-target">
 
 ### 5. Switching backends requires rewriting code
 
-**Plugin architecture.** Core ships with memory and SQLite. Redis, MongoDB, and RabbitMQ install as separate packages. Swap by config, not code<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
+**Plugin architecture.** Core ships with memory and SQLite. Redis, MongoDB, and RabbitMQ install as separate packages. Swap by config, not code<img class="shroom-dot" src="/assets/img/shared/pynenc_logo.png" alt="">
 
-<div class="shroom-divider"><img src="/assets/img/pynenc_logo.png" alt="~"></div>
+<div class="shroom-divider"><img src="/assets/img/shared/pynenc_logo.png" alt="~"></div>
 
 
 ## What Pynenc solves
 
 ### 1. Tasks disappear when workers crash
 
-**Pynenc tracks every invocation through a strict state machine** with ownership semantics and runner heartbeats. Dead runners are detected automatically; orphaned invocations are reclaimed and re-routed<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
+**Pynenc tracks every invocation through a strict state machine** with ownership semantics and runner heartbeats. Dead runners are detected automatically; orphaned invocations are reclaimed and re-routed<img class="shroom-dot" src="/assets/img/shared/pynenc_logo.png" alt="">
 
 ### 2. Duplicate work runs in parallel
 
-**Built-in concurrency control** with four modes: `DISABLED`, `TASK` (one per task), `ARGUMENTS` (one per unique args), `KEYS` (one per arbitrary key). Duplicates are rejected before reaching a worker<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
+**Built-in concurrency control** with four modes: `DISABLED`, `TASK` (one per task), `ARGUMENTS` (one per unique args), `KEYS` (one per arbitrary key). Duplicates are rejected before reaching a worker<img class="shroom-dot" src="/assets/img/shared/pynenc_logo.png" alt="">
 
 ### 3. Dependencies deadlock your workers
 
-Task A waits on B, B waits on C, all workers blocked. **Pynenc's orchestrator pauses waiting tasks to free their slots**, then **prioritizes by dependency count** — the task blocking the most others runs first. Dependency chains resolve without holding threads hostage<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
+Task A waits on B, B waits on C, all workers blocked. **Pynenc's orchestrator pauses waiting tasks to free their slots**, then **prioritizes by dependency count** — the task blocking the most others runs first. Dependency chains resolve without holding threads hostage<img class="shroom-dot" src="/assets/img/shared/pynenc_logo.png" alt="">
 
 ### 4. Failures are impossible to debug
 
 **Pynmon** (built-in monitoring UI) provides SVG timelines showing when each invocation started, paused, resumed, and finished across all runners. Family trees show parent-child relationships. The log explorer turns raw logs into clickable cross-references.
 
-<img src="/assets/img/pynmon_timeline.png" alt="Pynmon execution timeline showing task execution across multiple runners with status transitions" class="pynmon-screenshot lightbox-target">
+<img src="/assets/img/shared/pynmon_timeline.png" alt="Pynmon execution timeline showing task execution across multiple runners with status transitions" class="pynmon-screenshot lightbox-target">
 
 ### 5. Switching backends requires rewriting code
 
-**Plugin architecture.** Core ships with memory and SQLite. Redis, MongoDB, and RabbitMQ install as separate packages. Swap by config, not code<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
+**Plugin architecture.** Core ships with memory and SQLite. Redis, MongoDB, and RabbitMQ install as separate packages. Swap by config, not code<img class="shroom-dot" src="/assets/img/shared/pynenc_logo.png" alt="">
 
-<div class="shroom-divider"><img src="/assets/img/pynenc_logo.png" alt="~"></div>
+<div class="shroom-divider"><img src="/assets/img/shared/pynenc_logo.png" alt="~"></div>
 
 ## Quick start
 
@@ -97,25 +97,25 @@ pynenc --app=tasks.app runner start
 ```
 
 <div class="disclaimer-box">
-<img class="shroom-sm" src="/assets/img/pynenc_logo.png" alt=""> <strong>Fine print:</strong> this runs in-memory on a single thread. For distributed execution, add a backend:
+<img class="shroom-sm" src="/assets/img/shared/pynenc_logo.png" alt=""> <strong>Fine print:</strong> this runs in-memory on a single thread. For distributed execution, add a backend:
 <code>pip install pynenc-redis</code> / <code>pynenc-mongodb</code> / <code>pynenc-rabbitmq</code>
 </div>
 
-More in the [Usage Guide](https://docs.pynenc.org/en/latest/usage_guide/index.html) and [samples repo](https://github.com/pynenc/samples)<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
+More in the [Usage Guide](https://docs.pynenc.org/en/latest/usage_guide/index.html) and [samples repo](https://github.com/pynenc/samples)<img class="shroom-dot" src="/assets/img/shared/pynenc_logo.png" alt="">
 
-<div class="shroom-divider"><img src="/assets/img/pynenc_logo.png" alt="~"></div>
+<div class="shroom-divider"><img src="/assets/img/shared/pynenc_logo.png" alt="~"></div>
 
-## Under the hood <img class="shroom-sm" src="/assets/img/pynenc_logo.png" alt="">
+## Under the hood <img class="shroom-sm" src="/assets/img/shared/pynenc_logo.png" alt="">
 
 **Invocation state machine** — Every task call becomes an invocation moving through `REGISTERED → PENDING → RUNNING → SUCCESS/FAILED`. Transitions are enforced; each change is recorded with timestamps and ownership metadata.
 
-**Recovery** — Runners emit heartbeats. A background atomic service detects dead runners and invocations stuck beyond configured thresholds. Orphaned work is reclaimed under a distributed lock and re-queued transparently<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
+**Recovery** — Runners emit heartbeats. A background atomic service detects dead runners and invocations stuck beyond configured thresholds. Orphaned work is reclaimed under a distributed lock and re-queued transparently<img class="shroom-dot" src="/assets/img/shared/pynenc_logo.png" alt="">
 
 **Workflows** — Multi-step workflows with result persistence. On replay, completed steps are skipped; failed workflows resume from the last checkpoint, not from the start.
 
-<div class="shroom-divider"><img src="/assets/img/pynenc_logo.png" alt="~"></div>
+<div class="shroom-divider"><img src="/assets/img/shared/pynenc_logo.png" alt="~"></div>
 
-## Features <img class="shroom-sm" src="/assets/img/pynenc_logo.png" alt="">
+## Features <img class="shroom-sm" src="/assets/img/shared/pynenc_logo.png" alt="">
 
 <div class="feature-grid">
 <div class="feature-card">
@@ -153,9 +153,9 @@ More in the [Usage Guide](https://docs.pynenc.org/en/latest/usage_guide/index.ht
 
 </div>
 
-<div class="shroom-divider"><img src="/assets/img/pynenc_logo.png" alt="~"></div>
+<div class="shroom-divider"><img src="/assets/img/shared/pynenc_logo.png" alt="~"></div>
 
-## Plugin system <img class="shroom-sm" src="/assets/img/pynenc_logo.png" alt="">
+## Plugin system <img class="shroom-sm" src="/assets/img/shared/pynenc_logo.png" alt="">
 
 | Plugin | Package | Provides |
 |---|---|---|
@@ -175,7 +175,7 @@ app = (
 )
 ```
 
-## Monitoring with Pynmon <img class="shroom-sm" src="/assets/img/pynenc_logo.png" alt="">
+## Monitoring with Pynmon <img class="shroom-sm" src="/assets/img/shared/pynenc_logo.png" alt="">
 
 A built-in web UI that gives real-time visibility into every invocation, runner, and workflow — no external tooling required.
 
@@ -185,32 +185,32 @@ pynenc --app=tasks.app monitor --host 0.0.0.0 --port 8000
 
 <div class="pynmon-showcase" markdown="1">
 
-<img src="/assets/img/pynmon_dashboard.png" alt="Pynmon dashboard showing application overview, invocation status, component architecture, and configuration" class="pynmon-screenshot lightbox-target">
+<img src="/assets/img/shared/pynmon_dashboard.png" alt="Pynmon dashboard showing application overview, invocation status, component architecture, and configuration" class="pynmon-screenshot lightbox-target">
 
 ### Execution Timeline
 
 See what ran across every runner and worker, at every moment. Status transitions are color-coded — orange for pending, green for completed, blue for running — with connections between parent and child invocations.
 
-<img src="/assets/img/pynenc_runners_timeline_detail.png" alt="Pynmon timeline comparing ThreadRunner, ProcessRunner, PersistentProcessRunner, and MultiThreadRunner" class="pynmon-screenshot lightbox-target">
+<img src="/assets/img/shared/pynenc_runners_timeline_detail.png" alt="Pynmon timeline comparing ThreadRunner, ProcessRunner, PersistentProcessRunner, and MultiThreadRunner" class="pynmon-screenshot lightbox-target">
 
 ### Family Tree
 
 Navigate the full hierarchy of task calls as an interactive graph. Selecting a node cross-highlights it on the timeline, and vice versa.
 
-<img src="/assets/img/pynmon_family_tree.png" alt="Pynmon family tree overlaid on timeline with cross-highlighting between graph and execution view" class="pynmon-screenshot lightbox-target">
+<img src="/assets/img/shared/pynmon_family_tree.png" alt="Pynmon family tree overlaid on timeline with cross-highlighting between graph and execution view" class="pynmon-screenshot lightbox-target">
 
 ### Log Explorer
 
 Paste your log lines and the Log Explorer augments them with full context — parsing runner contexts, invocation IDs, and task references, resolving each to its detail page with a mini-timeline.
 
-<img src="/assets/img/pynmon_log_explorer.png" alt="Pynmon Log Explorer parsing log lines with augmented context, mini-timeline, and links" class="pynmon-screenshot lightbox-target">
+<img src="/assets/img/shared/pynmon_log_explorer.png" alt="Pynmon Log Explorer parsing log lines with augmented context, mini-timeline, and links" class="pynmon-screenshot lightbox-target">
 
 </div>
 
 ## Trigger system
 
 Tasks can start automatically based on cron schedules, custom events, or the outcome
-of other tasks. Triggers compose with AND/OR logic for complex automation flows<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
+of other tasks. Triggers compose with AND/OR logic for complex automation flows<img class="shroom-dot" src="/assets/img/shared/pynenc_logo.png" alt="">
 
 ```python
 trigger = app.trigger.on_success(process_data).run(notify_admin)
@@ -218,9 +218,9 @@ trigger = app.trigger.on_success(process_data).run(notify_admin)
 scheduled = app.trigger.on_cron("*/30 * * * *").run(process_data, ...)
 ```
 
-<div class="shroom-divider"><img src="/assets/img/pynenc_logo.png" alt="~"></div>
+<div class="shroom-divider"><img src="/assets/img/shared/pynenc_logo.png" alt="~"></div>
 
-## Get involved <img class="shroom-sm" src="/assets/img/pynenc_logo.png" alt="">
+## Get involved <img class="shroom-sm" src="/assets/img/shared/pynenc_logo.png" alt="">
 
 - **Docs**: [docs.pynenc.org](https://docs.pynenc.org)
 - **Source**: [github.com/pynenc/pynenc](https://github.com/pynenc/pynenc)
@@ -230,4 +230,4 @@ scheduled = app.trigger.on_cron("*/30 * * * *").run(process_data, ...)
 
 **Current stable release**
 <img alt="github release" src="https://img.shields.io/github/v/release/pynenc/pynenc?display_name=tag&sort=semver">
-— Version line is now 0.2.x (currently 0.2.1). Core features are implemented and in active use; reports and contributions are very welcome<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt=""> MIT License<img class="shroom-dot" src="/assets/img/pynenc_logo.png" alt="">
+— Version line is now 0.2.x (currently 0.2.1). Core features are implemented and in active use; reports and contributions are very welcome<img class="shroom-dot" src="/assets/img/shared/pynenc_logo.png" alt=""> MIT License<img class="shroom-dot" src="/assets/img/shared/pynenc_logo.png" alt="">

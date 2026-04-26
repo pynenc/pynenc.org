@@ -5,6 +5,7 @@ subtitle: "Crash recovery with heartbeat-based orphan detection in pynenc"
 date: 2026-04-19 00:00:00 +0000
 categories: [publications, recovery]
 tags: [python, distributed-systems, reliability, pynenc]
+share-img: /assets/img/pynmon_timeline.png
 ---
 
 I ran `kill -9` on a worker that was processing three tasks. They vanished. No error. No retry. I checked the queue: empty. I checked the results: nothing. The work was just gone.

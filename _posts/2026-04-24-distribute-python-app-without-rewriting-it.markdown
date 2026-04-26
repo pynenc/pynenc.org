@@ -5,6 +5,7 @@ subtitle: "One decorator. One environment variable. Zero refactoring."
 date: 2026-04-24 00:00:00 +0000
 categories: [publications, direct-task]
 tags: [python, distributed-systems, migration, pynenc]
+share-img: /assets/img/pynenc_runners_timeline_detail.png
 ---
 
 You have a Python function that processes one item. You call it in a loop over a list. The list grows. The loop slows down. The work is real — an LLM API call, an embedding, a scrape, a database query, a model inference — the kind of thing that does not get faster with prettier code.

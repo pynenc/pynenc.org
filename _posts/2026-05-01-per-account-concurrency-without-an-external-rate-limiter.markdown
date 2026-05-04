@@ -148,16 +148,16 @@ def refresh_once(account_id: str) -> str:
 
 You can launch the demo two ways. The four-terminal flow is the one to use
 when you want to *watch* what each component is doing — the API printing
-collisions in real time, the worker logging task lifecycle, and pynmon
-visualising the orchestrator state. The one-command flow boots the API and
-the worker as subprocesses and runs all scenarios in sequence; it's how CI
-runs the sample.
+collisions in real time, the worker logging task lifecycle, and the pynenc
+monitoring page visualising the orchestrator state. The one-command flow
+boots the API and the worker as subprocesses and runs all scenarios in
+sequence; it's how CI runs the sample.
 
 ```bash
 # four terminals — recommended for exploring
 uv run uvicorn api_server:app --port 8765      # 1. API
 uv run pynenc --app tasks.app runner start     # 2. worker
-uv run pynmon                                  # 3. monitor (optional)
+uv run pynenc monitor                          # 3. monitor (optional) at http://127.0.0.1:8000
 uv run python enqueue.py all                   # 4. enqueue scenarios
 ```
 

@@ -1,4 +1,4 @@
-/* pynenc.org - minimal post subheader (no author, no share buttons) */
+/* pynenc.org - minimal post subheader */
 (function () {
   "use strict";
 
@@ -50,9 +50,17 @@
     var row = document.createElement("div");
     row.className = "post-subheader-minimal";
 
-    /* Left group: read time + copy URL */
+    /* Left group: author + read time + copy URL */
     var left = document.createElement("div");
     left.className = "post-subheader-left";
+
+    var authorMeta = document.querySelector('meta[name="author"]');
+    if (authorMeta && authorMeta.content) {
+      var author = document.createElement("span");
+      author.className = "post-meta-item post-meta-author";
+      author.textContent = authorMeta.content;
+      left.appendChild(author);
+    }
 
     var readTime = document.createElement("span");
     readTime.className = "post-meta-item";

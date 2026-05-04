@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  var SHROOM_SRC = "/assets/img/pynenc_logo.png";
+  var SHROOM_SRC = "/assets/img/shared/pynenc_logo.png";
 
   function createShroom(className) {
     var img = document.createElement("img");
@@ -34,7 +34,8 @@
 
   function decorateMedia(article) {
     var mediaImages = article.querySelectorAll(
-      "img[src*='/assets/img/publications/'], img[src*='assets/img/publications/']"
+      "img[src*='/assets/img/publications/'], img[src*='assets/img/publications/']," +
+      "img[src*='/assets/img/posts/'], img[src*='assets/img/posts/']"
     );
 
     mediaImages.forEach(function (image) {

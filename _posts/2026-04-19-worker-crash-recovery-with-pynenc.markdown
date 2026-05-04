@@ -5,8 +5,10 @@ subtitle: "Crash recovery with heartbeat-based orphan detection in pynenc"
 date: 2026-04-19 00:00:00 +0000
 categories: [publications, recovery]
 tags: [python, distributed-systems, reliability, pynenc]
+author: Jose Diaz
 share-img: /assets/img/posts/2026-04-19-worker-crash-recovery/wcr-monitoring.png
 description: "I killed a Python worker mid-task with SIGKILL. The tasks vanished. Here is how pynenc detects dead runners via heartbeats and recovers orphaned tasks automatically."
+keywords: "python worker crash recovery, task queue, heartbeat monitoring, orphaned tasks, pynenc, distributed systems, celery alternative"
 ---
 
 I ran `kill -9` on a worker that was processing three tasks. They vanished. No error. No retry. I checked the queue: empty. I checked the results: nothing. The work was just gone.

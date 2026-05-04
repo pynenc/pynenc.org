@@ -18,6 +18,18 @@ title: Pynenc
 # Your name to show in the footer
 author: Jose Diaz
 
+# Site language
+lang: en
+
+# Site description
+description: "A distributed async task framework for Python. Automatic crash recovery, per-account concurrency control, zero-rewrite task distribution."
+
+# Twitter / X handle — enables twitter:site and twitter:creator meta tags
+# summary_large_image shows the full share-img preview in Twitter/X cards
+twitter:
+  username: pynenc
+  card: summary_large_image
+
 # Github repository
 repository: pynenc/pynenc.org
 

@@ -3,7 +3,7 @@
   "use strict";
 
   function init() {
-    var src = "/assets/img/pynenc_logo.png";
+    var src = "/assets/img/shared/pynenc_logo.png";
     var brand = document.querySelector(".navbar-custom .navbar-brand");
     if (!brand) return;
 

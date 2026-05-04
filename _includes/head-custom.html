@@ -4,3 +4,36 @@
 <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon-16x16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
+
+{% if page.layout == "post" %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": {{ page.title | jsonify }},
+  "description": {{ page.description | default: site.description | jsonify }},
+  "image": "{{ page['share-img'] | default: '/assets/img/shared/pynenc_logo.png' | prepend: site.url }}",
+  "datePublished": "{{ page.date | date_to_xmlschema }}",
+  "dateModified": "{{ page.last_modified_at | default: page.date | date_to_xmlschema }}",
+  "url": "{{ page.url | prepend: site.url }}",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ page.url | prepend: site.url }}"
+  },
+  "author": {
+    "@type": "Person",
+    "name": {{ page.author | default: site.author | jsonify }}
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Pynenc",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "{{ site.url }}/assets/img/shared/pynenc_logo.png"
+    }
+  }{% if page.keywords %},
+  "keywords": {{ page.keywords | jsonify }}{% elsif page.tags.size > 0 %},
+  "keywords": {{ page.tags | join: ", " | jsonify }}{% endif %}
+}
+</script>
+{% endif %}

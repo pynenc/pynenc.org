@@ -5,8 +5,10 @@ subtitle: "One decorator. One environment variable. Zero refactoring."
 date: 2026-04-24 00:00:00 +0000
 categories: [publications, direct-task]
 tags: [python, distributed-systems, migration, pynenc]
+author: Jose Diaz
 share-img: /assets/img/shared/pynenc_runners_timeline_detail.png
 description: "One decorator. One environment variable. Five reports go from 2.51 seconds to 0.54 seconds. Zero call sites change. Here is how to distribute a Python app without rewriting it."
+keywords: "python distributed computing, task distribution, zero refactoring, async tasks, pynenc, background workers, parallel processing"
 ---
 
 You have a Python function that processes one item. You call it in a loop over a list. The list grows. The loop slows down. The work is real — an LLM API call, an embedding, a scrape, a database query, a model inference — the kind of thing that does not get faster with prettier code.

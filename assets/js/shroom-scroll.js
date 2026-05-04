@@ -81,7 +81,7 @@
       /* Navbar token — starts invisible and zero-width so flex
          re-centers as each mushroom grows in */
       var navImg = document.createElement("img");
-      navImg.src = "/assets/img/pynenc_logo.png";
+      navImg.src = "/assets/img/shared/pynenc_logo.png";
       navImg.alt = "";
       navImg.style.cssText = [
         "width:0",

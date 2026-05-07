@@ -1,23 +1,23 @@
 ---
 layout: post
-title: "Distribute your Python app without rewriting it"
-subtitle: "One decorator. One environment variable. Zero refactoring."
+title: "Distribute a Python function without changing callers"
+subtitle: "Use direct_task for blocking calls, sync tests, and worker execution."
 date: 2026-04-24 00:00:00 +0000
 categories: [publications, direct-task]
 tags: [python, distributed-systems, migration, pynenc]
 author: Jose Diaz
 share-img: /assets/img/shared/pynenc_runners_timeline_detail.png
-description: "One decorator. One environment variable. Five reports go from 2.51 seconds to 0.54 seconds. Zero call sites change. Here is how to distribute a Python app without rewriting it."
-keywords: "python distributed computing, task distribution, zero refactoring, async tasks, pynenc, background workers, parallel processing"
+description: "How pynenc direct_task lets existing Python functions run on workers while keeping call sites unchanged, with sync mode for tests and local development."
+keywords: "python distributed computing, task distribution, direct task, sync task testing, pynenc, background workers, parallel processing"
 ---
 
-You have a Python function that processes one item. You call it in a loop over a list. The list grows. The loop slows down. The work is real — an LLM API call, an embedding, a scrape, a database query, a model inference — the kind of thing that does not get faster with prettier code.
+You have a Python function that processes one item. You call it in a loop. The list grows, and the loop slows down because each call waits on I/O: an API request, a database query, a scrape, an embedding, a model call.
 
-Distribution is the answer. Distribution usually means rewriting every call site to handle queues, futures, and result objects. So the loop stays slow and a progress bar gets added.
+Parallel execution can help. The hard part is migration. In many task systems, `result = f(x)` becomes "enqueue this, keep a handle, wait for the result somewhere else." That is a real rewrite when the function is already used across a codebase.
 
-This post is about removing the migration cost. **One decorator. One environment variable. Five reports go from 2.51 seconds to 0.54 seconds. Zero call sites change.**
+`@app.direct_task` is for the case where the existing call shape matters. In sync mode, the call runs inline. With a runner, the same call is executed by a worker and the caller waits for the returned value. The caller still writes `result = f(x)`.
 
-The whole demo is in the [direct_task_demo](https://github.com/pynenc/samples/tree/main/direct_task_demo) sample of the [pynenc samples](https://github.com/pynenc/samples) repository. The example happens to generate sales reports because it needs a concrete I/O-bound function with a list-shaped input — but the pattern is the same for batch LLM calls, embedding generation, RAG indexing, web scraping, ETL enrichment, or any workload of the form "slow function, list of items, want it parallel".
+The sample uses five report jobs because the timings are easy to see: sequential execution takes about 2.5 seconds, and worker execution with caller-side concurrency takes about 0.5 seconds on this workload. The whole demo is in [direct_task_demo](https://github.com/pynenc/samples/tree/main/direct_task_demo).
 
 ## The original code
 
@@ -82,7 +82,9 @@ def _flatten(chunks: list[list[dict]]) -> list[dict]:
 
 ## Sync mode: the decorators are inert
 
-Setting `PYNENC__DEV_MODE_FORCE_SYNC_TASKS=True` runs every decorated call inline in the caller's thread — no runner, no broker, no database writes. Behaviour is identical to `tasks_original.py`: 5 reports in 2.52s, same values, same order. This is the strangler-fig migration pattern: decorate one function at a time, keep the env var on so existing tests stay green, then remove it in production. No call site needs to change.
+Setting `PYNENC__DEV_MODE_FORCE_SYNC_TASKS=True` runs every decorated call inline in the caller's thread: no runner, no broker, no database writes. Behaviour is identical to `tasks_original.py`: 5 reports in 2.52s, same values, same order.
+
+That makes the migration incremental. You can decorate one function, keep sync mode on while tests and local development continue to call it normally, then run the same function through workers when you are ready.
 
 ```text
 $ PYNENC__DEV_MODE_FORCE_SYNC_TASKS=True python sample_sync.py
@@ -107,7 +109,7 @@ Concurrent caller threads: 5 reports in 0.54s (N caller threads -> N workers run
   ...
 ```
 
-Two patterns appear here. The sequential loop is the original code, unchanged — each `generate_report(p)` blocks before the next call starts. That is by design: `@app.direct_task` preserves the calling contract of a regular Python function. The caller waits, gets the value back, and exception handling works as it always did. That guarantee is what makes the migration zero-cost.
+Two patterns appear here. The sequential loop is the original code, unchanged: each `generate_report(p)` blocks before the next call starts. That is by design. `@app.direct_task` preserves the way a normal Python function is called: the caller waits, gets the value back, and exceptions are raised in the caller.
 
 For caller-side concurrency, `ThreadPoolExecutor` is the standard Python pattern, and it composes naturally:
 
@@ -118,7 +120,7 @@ with ThreadPoolExecutor(max_workers=len(PERIODS)) as pool:
     reports = list(pool.map(generate_report, PERIODS))
 ```
 
-Each thread blocks on its own call; the runner processes them in parallel. Five reports in 0.54 seconds — five times faster on the same machine, with no broker change.
+Each thread blocks on its own call; the runner processes them in parallel. Five reports finish in 0.54 seconds in this local I/O-bound demo.
 
 ## Single-call fan-out
 
@@ -145,26 +147,25 @@ $ python sample_parallel.py
 Parallel fan-out: 5 reports in 0.65s (one call, 5 workers running in parallel)
 ```
 
-The function signature is honest. Nothing is "ignored". The argument the caller passes is the argument `parallel_func` reads.
+The argument the caller passes is the argument `parallel_func` reads. The function still returns the same list shape as before.
 
-For higher throughput, pynenc's native parallel API goes further: instead of aggregating before returning, the function exposes a result group that the caller can iterate as results arrive. Each item is available as soon as the worker that produced it finishes — no waiting for the slowest one. The `parallel_func` pattern shown here is the zero-migration-cost option: same signature, same return type, same call site, parallelism handled entirely by the decorator.
+For higher throughput, pynenc also supports result groups that the caller can iterate as results arrive. The `parallel_func` pattern shown here is the lower-migration option: same signature, same return type, same call site, and parallelism handled by the decorator.
 
-## Why not just use `asyncio` / `multiprocessing` / Celery?
+## How this differs from other Python concurrency tools
 
-These are the obvious alternatives and each one solves a different slice of the problem.
+Several standard tools help with concurrency, but they change different parts of the program:
 
-- **`asyncio.gather`** parallelises async I/O on a single event loop. It works only if the function is already `async`, only on one machine, and only for I/O-bound work. Synchronous functions need to be rewritten.
-- **`multiprocessing.Pool.map`** parallelises across CPU cores on a single host. It cannot scale beyond one machine, struggles with large arguments (everything is pickled and copied), and the call site changes from `f(x)` to `pool.map(f, xs)`.
-- **`concurrent.futures.ThreadPoolExecutor`** is a clean primitive but stops at the process boundary. With `@app.direct_task` it composes — use it on the caller side and pynenc handles the worker side, optionally on different machines.
-- **Celery / RQ / Dramatiq** scale across machines but break the calling contract: `f(x)` becomes `f.delay(x).get()` or similar. Every call site has to change. There is no in-process sync mode for unit tests — you run a worker or you mock.
+- **`asyncio`** is a good fit when the code is already async I/O. A synchronous function still needs adaptation.
+- **Thread and process pools** are good local primitives. The caller owns the pool and the work stays inside one host or process boundary.
+- **Traditional task queues** scale work out to workers, but the call usually changes from a direct function call to a submit/wait/result API.
 
-`@app.direct_task` is the option that gives you all three properties at once: distributed across machines, the call site does not change, and a single environment variable runs everything inline for tests and local development.
+`@app.direct_task` is for the overlap: run work on pynenc workers, keep the direct call form, and keep a sync mode for tests and local development.
 
 ## When `direct_task` is the right tool
 
-`@app.direct_task` always blocks the caller. That is the point: it preserves the calling contract that the original code already relied on. Migration is a copy-the-decorator operation, not a rewrite.
+`@app.direct_task` always blocks the caller. That is the point: it preserves the behaviour the original code already relied on. Migration can happen one function at a time.
 
-For fire-and-forget semantics — enqueue work and continue without blocking — `@app.task` is the right decorator. It returns an `Invocation` and exposes `.result` for explicit waiting. The two decorators are complementary; the right choice is whichever one preserves the call pattern the codebase already has.
+For work that should be enqueued while the caller continues immediately, `@app.task` is the right decorator. It returns an `Invocation` and exposes `.result` for explicit waiting. The two decorators are complementary; the right choice is the one that matches the call pattern your code already has.
 
 ## Try it
 

@@ -1,64 +1,59 @@
 ---
 layout: post
-title: "Task concurrency by key arguments, tune API consumption with pynenc"
-subtitle: "One slot per account key, full throughput across all others — no lock sidecar, two decorator flags."
+title: "Per-account task concurrency without a lock service"
+subtitle: "Serialize work by account key while keeping other accounts parallel."
 date: 2026-05-01 00:00:00 +0000
 categories: [publications, concurrency]
-tags: [python, fastapi, external-apis, concurrency-control, distributed-systems, pynenc]
+tags: [python, external-apis, concurrency-control, distributed-systems, pynenc]
 author: Jose Diaz
 share-img: /assets/img/posts/2026-05-02-all-tests-timeline.png
-description: "Use Pynenc keyed concurrency to run Python background workers in parallel across SaaS client accounts while preventing overlapping calls for the same account. FastAPI demo, no Redis lock service."
-keywords: "python concurrency, per-account rate limiting, task queue, SaaS background jobs, pynenc, distributed systems, FastAPI, async workers"
+description: "How pynenc keyed concurrency keeps one task running per account while allowing other accounts to run in parallel, without a separate lock service."
+keywords: "python keyed concurrency, per-account task concurrency, tenant rate limit, task queue, SaaS background jobs, pynenc, distributed workers"
 ---
 
-You run a SaaS. Your customers are companies — let's call them client
-accounts. In the background, your workers call an external data provider on
-behalf of each client: fetch their profile, list their invoices, refresh
-their usage, push a metadata update. The provider issues credentials
-*per client account*, and its quota limits apply *per client*: you can
-hammer the provider with calls for fifty different clients in parallel, but
-run two calls for the same client at the same time and it throttles that
-account, drops the request, or returns inconsistent data.
+Many background jobs call an external system on behalf of separate accounts,
+tenants, or installations. The external system allows parallel calls across
+different accounts, but it does not allow two calls for the *same* account to
+run at the same time.
 
-You want maximum throughput — saturate your worker pool across all clients.
-But for any *single* client, only one call may be in flight at a time. That
-constraint lives at the account boundary, not at the API-key level.
+That is not a global rate limit. It is concurrency by key: the key might be
+`account_id`, `tenant_id`, or another argument that identifies the shared
+quota or state boundary.
 
-That is where a lot of Python background job systems get awkward. With
-enough workers, two of them eventually grab work for the same client in
-parallel. The provider throttles that client's account, and now you have a
-support ticket and a partial sync to reconcile.
+You want the worker pool busy across many accounts, while each account stays
+serial. Without that guard, two workers eventually pick up work for the same
+account in parallel. The external system may throttle the account, reject the
+second call, or leave you with a partial update to reconcile.
 
-The advice on the internet is some combination of:
+The usual fixes are external locks, one queue per account, or retry/backoff
+logic around every call. They can work, but they add another coordination
+layer to the job system.
 
-- "Add Redis and a per-key lock service."
-- "Run one worker per client account." (Fine for 5 clients. Absurd at 200.)
-- "Use a rate limiter with token buckets and exponential backoff."
-
-There is a simpler option, and if you already use pynenc you already have
-it. **Two flags on `@app.task` make the orchestrator enforce: at most one
-in-flight invocation per client account key, full parallelism across
-different clients, and — if you want it — duplicates collapsed before they
-ever reach a worker.**
+Pynenc's orchestrator already tracks running invocations and their arguments.
+With `running_concurrency=KEYS` and `key_arguments=("account_id",)`, it can
+enforce one in-flight invocation per account key while still running different
+accounts in parallel. `reroute_on_concurrency_control` decides whether blocked
+work waits or is dropped, and `registration_concurrency=KEYS` can collapse
+duplicate work before a worker sees it.
 
 Full sample: [samples/concurrency_demo](https://github.com/pynenc/samples/tree/main/concurrency_demo).
 
-## The setup
+## The demo
 
 Four tiny files, each doing one thing:
 
 ```text
 concurrency_demo/
-├── api_server.py     # tiny FastAPI: pretends to be the external provider
+├── api_server.py     # tiny HTTP app: pretends to be the external provider
 ├── tasks.py          # PynencBuilder app + 4 tasks (the whole story)
 ├── enqueue.py        # CLI: enqueue one scenario, print results
 └── sample.py         # one-command demo: boots api+worker, runs all scenarios
 ```
 
-The "external provider" is a FastAPI app that holds an account in flight for
-0.4 seconds per call and records a *collision* whenever a second request
-arrives while the first is still in flight — a stand-in for the 429s and
-silent inconsistencies a real provider would produce:
+The "external provider" is a small HTTP app that holds an account in flight
+for 0.4 seconds per call and records a *collision* whenever a second request
+arrives while the first is still in flight. In a real integration, that
+collision could be a 429, a rejected write, or an inconsistent refresh:
 
 ```python
 # api_server.py — the part that matters
@@ -146,12 +141,10 @@ def refresh_once(account_id: str) -> str:
 
 ## How to run it
 
-You can launch the demo two ways. The four-terminal flow is the one to use
-when you want to *watch* what each component is doing — the API printing
-collisions in real time, the worker logging task lifecycle, and the pynenc
-monitoring page visualising the orchestrator state. The one-command flow
-boots the API and the worker as subprocesses and runs all scenarios in
-sequence; it's how CI runs the sample.
+You can launch the demo two ways. The four-terminal flow is useful when you
+want to watch the API, the worker, and the pynenc monitor at the same time.
+The one-command flow boots the API and worker for you and runs every scenario
+in sequence; it is the path used by CI.
 
 ```bash
 # four terminals — recommended for exploring
@@ -168,12 +161,17 @@ uv run python sample.py
 
 ## What the API observes
 
-All four scenarios, end to end, on a single pynmon timeline. Read it left
-to right: scenario A bursts open with eight overlapping bars (the
-collisions); B fans out into three lanes that strictly serialise per
-account; C is over almost immediately because most invocations land in
-`CONCURRENCY_CONTROLLED_FINAL`; D collapses 24 enqueues into three calls
-before a worker ever sees them.
+All four scenarios, end to end, on a single pynmon timeline. Read it left to
+right: scenario A starts with overlapping calls for the same accounts; B fans
+out into three account lanes that stay serial per account; C drops blocked
+work instead of rerouting it; D collapses duplicate refresh requests before a
+worker ever sees them.
+
+Two pynenc state names appear in the screenshots and logs. `REROUTED` means
+the worker tried to start an invocation, found the account key already busy,
+and put the invocation back on the queue. `CONCURRENCY_CONTROLLED_FINAL`
+means the invocation was blocked by the key rule and intentionally finished
+without running.
 
 ![All four scenarios on one pynmon invocation timeline](/assets/img/posts/2026-05-02-all-tests-timeline.png)
 
@@ -215,13 +213,13 @@ throttle, or inconsistent response.
 
 ### Scenario B — `running_concurrency=KEYS`, `reroute=True`
 
-Same 12 calls as A, zero collisions. The orchestrator indexes invocation
-arguments and refuses to start a second `call_keyed` while one with the
-same `account_id` is already running. When a worker tries to pick up a
-blocked invocation, `reroute_on_concurrency_control=True` puts it back on
-the queue so it retries when the slot frees up. The timeline shows three
-clean lanes — one per account — with the non-leading invocations bouncing
-through `REROUTED` until they get their turn.
+Same 12 calls as A, no collisions. The orchestrator indexes invocation
+arguments and refuses to start a second `call_keyed` while one with the same
+`account_id` is already running. When a worker tries to pick up a blocked
+invocation, `reroute_on_concurrency_control=True` puts it back on the queue
+so it can run when the slot frees up. The timeline shows three clean lanes,
+one per account, with blocked invocations moving through `REROUTED` until
+they get their turn.
 
 ```text
 === B. keyed — running_concurrency=KEYS, reroute=True ===
@@ -273,14 +271,13 @@ invocations finish.
 
 ### Scenario D — `registration_concurrency=KEYS` + `running_concurrency=KEYS`
 
-A different question. `registration_concurrency` checks at *enqueue*
-time: when refresh request number two for `acme` arrives, there is
-already one registered, so the producer gets back a `ReusedInvocation`
-pointing to the first. 24 logical “please refresh this account” events —
-eight per client account — collapse to 3 actual API calls before a worker
-ever picks them up. The `running_concurrency` guard is the safety net for
-the rare case where the worker is unusually fast and picks up the first
-task before all duplicates have registered.
+A different question. `registration_concurrency` checks at *enqueue* time:
+when refresh request number two for `acme` arrives, there is already one
+registered, so the producer gets back a `ReusedInvocation` pointing to the
+first. 24 logical "please refresh this account" events, eight per account,
+collapse to 3 actual API calls before a worker picks them up. The
+`running_concurrency` guard is the safety net for the case where a worker
+picks up the first task before all duplicates have registered.
 
 ```text
 === D. dedupe — registration + running KEYS ===
@@ -299,13 +296,11 @@ task before all duplicates have registered.
 
 ## When to reach for which
 
-The pattern generalises cleanly. Your SaaS calls a third-party provider on
-behalf of each client — think Salesforce, HubSpot, Stripe, GitHub Apps,
-Shopify, or any OAuth-based integration where each client has their own
-credentials and their own rate-limit bucket. The provider doesn't care how
-many different client accounts you query in parallel; it only throttles when
-you fire two requests against the *same* client account simultaneously. That
-is the quota boundary the orchestrator needs to respect.
+The pattern applies whenever an argument marks the boundary for shared state
+or quota. The external system may be a third-party API, an internal service,
+or a resource that should only be touched by one task at a time for a given
+key. The system may allow broad parallelism overall, while still requiring
+serialization for each account, tenant, installation, or resource id.
 
 The two settings cover most of what people reach for an external
 rate-limiter or a per-tenant lock service for:
@@ -331,10 +326,9 @@ rate-limiter or a per-tenant lock service for:
   Together they guarantee exactly one call per account, regardless of
   timing. Scenario D in the sample.
 
-And — the part that matters in production — there is no extra lock service.
-No Redis lock library. No rate-limiter sidecar. The orchestrator already
-tracks invocations to do its job; checking for an existing one with the
-same key is the same kind of lookup.
+In production terms, the useful part is that this does not require a separate
+lock service. The orchestrator already tracks invocations to route work;
+checking whether a matching key is already running uses that same state.
 
 ## Simpler scopes when you don't need keys
 
@@ -367,11 +361,10 @@ Two things people will (correctly) ask for:
 - **Multi-slot concurrency** — "up to 5 in flight per key", not just 1.
 - **Time-window rate limits** — "100 calls per minute per key".
 
-Both are on the roadmap. The current primitive — *exactly one in-flight
-invocation per key for a task* — already covers a common integration
-problem: external APIs that allow parallelism across accounts but not
-overlapping calls for the same account. The bigger ones build on the same
-orchestrator machinery.
+Both are on the roadmap. The current primitive - one in-flight invocation per
+task/key - already covers a common integration problem: systems that allow
+parallelism across accounts but not overlapping work for the same account.
+The bigger controls build on the same orchestrator machinery.
 
 ## How to try it
 
@@ -382,7 +375,7 @@ uv sync
 uv run python sample.py
 ```
 
-The full sample, the FastAPI server, and the README are at
+The full sample and README are at
 [github.com/pynenc/samples/tree/main/concurrency_demo](https://github.com/pynenc/samples/tree/main/concurrency_demo).
 The pynenc framework is on PyPI as
 [`pynenc`](https://pypi.org/project/pynenc/) and the source is at

@@ -1,30 +1,31 @@
 ---
 layout: post
-title: "I Killed a Python Worker Mid-Task. Here's What Should Have Happened."
-subtitle: "Crash recovery with heartbeat-based orphan detection in pynenc"
+title: "Recover Python tasks after a worker crash"
+subtitle: "Heartbeat checks, orphaned invocations, and automatic rerouting in pynenc"
 date: 2026-04-19 00:00:00 +0000
 categories: [publications, recovery]
 tags: [python, distributed-systems, reliability, pynenc]
 author: Jose Diaz
 share-img: /assets/img/posts/2026-04-19-worker-crash-recovery/wcr-monitoring.png
-description: "I killed a Python worker mid-task with SIGKILL. The tasks vanished. Here is how pynenc detects dead runners via heartbeats and recovers orphaned tasks automatically."
-keywords: "python worker crash recovery, task queue, heartbeat monitoring, orphaned tasks, pynenc, distributed systems, celery alternative"
+description: "How pynenc uses runner heartbeats to detect crashed workers, mark orphaned task invocations, and route them back to healthy Python workers for recovery."
+keywords: "python worker crash recovery, task queue recovery, heartbeat monitoring, orphaned tasks, pynenc, distributed task runner"
 ---
 
-I ran `kill -9` on a worker that was processing three tasks. They vanished. No error. No retry. I checked the queue: empty. I checked the results: nothing. The work was just gone.
+I wanted a small failure test: start a few long-running tasks, kill the worker, then see whether the work still finishes.
 
-This is not a bug. This is the default behavior of many Python task frameworks. A worker dies mid-execution, and whatever it was doing disappears.
+This is where queue delivery and task recovery are not the same thing. A queue can hand work to a worker. Once that work is acknowledged and the worker starts running it, the queue may no longer know enough to recover it if the process dies.
 
-So I built a framework where the system heals itself. Here is what that looks like.
+Pynenc keeps that missing state in the orchestrator. A runner is the process that executes tasks. An invocation is one concrete execution of a task. While a runner is alive, it sends heartbeats. If those heartbeats stop, pynenc can find the invocations that were running on that runner and route them again.
 
-## The problem nobody talks about
+## The failure mode
 
-Here is what usually happens when a worker crashes in the middle of a task:
+Here is the failure mode this test is trying to expose:
 
 1. A task starts running on Worker-1.
 2. Worker-1 gets OOM-killed (or crashes, or the host dies).
 3. The task message was already acknowledged and removed from the queue.
-4. The task is gone: no record, no detection, no recovery.
+4. The queue has no pending message left to deliver.
+5. Unless some other component tracks running work, the task is lost.
 
 Typical workarounds teams build by hand:
 
@@ -32,9 +33,9 @@ Typical workarounds teams build by hand:
 - External monitoring, which detects failures but still requires manual re-queueing.
 - Strict idempotency layers everywhere, which are useful but still need a recovery trigger.
 
-These are not complete solutions. They are patches around a missing core capability.
+Those tools can be useful, but they do not replace a durable record of which task invocations are running and which runner owns them.
 
-## So I killed a worker. Here is what happened
+## The recovery test
 
 I ran the same crash scenario with [pynenc](https://github.com/pynenc/pynenc): three tasks running, then `SIGKILL`, then a second worker.
 
@@ -67,13 +68,11 @@ STEP 5: Waiting for recovery and task completion...
   Tasks from the crashed worker were recovered automatically!
 ```
 
-Worker-1 died mid-execution. Worker-2 detected the stale heartbeat, recovered orphaned tasks, and finished all three with zero manual intervention.
+Worker-1 died mid-execution. Worker-2 detected the stale heartbeat, recovered the orphaned invocations, and finished the work without a manual requeue step.
 
 ## Monitoring view
 
 ![Pynmon monitoring view during recovery demo](/assets/img/posts/2026-04-19-worker-crash-recovery/wcr-monitoring.png)
-
-_Click to open the image at full size._
 
 This is the same monitoring view used during the run. From here you can inspect the
 timeline across runners, open each invocation detail, and follow the logs around state
@@ -81,18 +80,18 @@ changes to understand what happened step by step.
 
 ## How recovery works
 
-Every runner sends periodic heartbeats. As long as heartbeats arrive, the runner is healthy.
+Every runner sends periodic heartbeats. As long as heartbeats arrive, the orchestrator treats the runner as alive.
 
 When heartbeats stop:
 
-1. The recovery service marks the runner as stale.
-2. Orphaned running invocations are claimed safely.
-3. Tasks are re-routed to the broker.
-4. Healthy runners pick them up.
+1. A scheduled recovery check sees that the runner heartbeat is stale.
+2. Running invocations owned by that runner become orphaned.
+3. The recovery step claims those invocations and routes them back to the broker.
+4. Healthy runners pick them up and execute them again.
 
-This is built in. No external watcher process required.
+This is built into pynenc's orchestration layer. The sample does not need a separate watcher process.
 
-Recovery re-executes the full task, so designing tasks to be idempotent remains a best practice.
+Recovery re-executes the full task, so tasks that touch external systems should still be idempotent or safe to retry.
 
 ## The code
 
@@ -148,24 +147,24 @@ uv sync
 uv run python sample.py
 ```
 
-No Docker. No Redis. No external services. One demo.
+The sample uses SQLite, so you can run the recovery path locally without setting up extra services.
 
-## What teams usually build by hand
+## What this replaces
 
 | The problem | Typical approach | What pynenc does |
 | --- | --- | --- |
 | Worker dies mid-task | Lost task or duplicate retries | Automatic recovery via heartbeat detection |
 | Detecting dead workers | External monitoring stack | Built-in runner heartbeat checks |
 | Re-queuing orphaned tasks | Manual scripts and intervention | Automatic re-routing to broker |
-| Recovery in clusters | Custom distributed locking | Atomic global recovery service |
-| Understanding incidents | Log spelunking | Invocation state history and timeline views |
+| Recovery across workers | Custom coordination code | Recovery check over shared invocation state |
+| Understanding incidents | Manual log searches | Invocation state history and timeline views |
 
-## What is next
+## Project links
 
-Pynenc is open source and actively maintained:
+The recovery sample is part of the pynenc ecosystem:
 
 - [pynenc](https://github.com/pynenc/pynenc) - core framework
 - [samples](https://github.com/pynenc/samples) - runnable demos
 - [docs](https://docs.pynenc.org) - full documentation
 
-How does your team handle crashed workers today? Join the conversation in [GitHub Discussions](https://github.com/pynenc/pynenc/discussions).
+Questions and failure cases are welcome in [GitHub Discussions](https://github.com/pynenc/pynenc/discussions).

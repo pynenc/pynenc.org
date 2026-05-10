@@ -35,10 +35,21 @@
   function decorateMedia(article) {
     var mediaImages = article.querySelectorAll(
       "img[src*='/assets/img/publications/'], img[src*='assets/img/publications/']," +
-      "img[src*='/assets/img/posts/'], img[src*='assets/img/posts/']"
+      "img[src*='/assets/img/posts/'], img[src*='assets/img/posts/']," +
+      "img[src*='/assets/img/shared/'], img[src*='assets/img/shared/']"
     );
 
     mediaImages.forEach(function (image) {
+      var src = image.getAttribute("src") || "";
+      if (
+        src.indexOf("pynenc_logo") !== -1 ||
+        image.classList.contains("publication-shroom-token") ||
+        image.classList.contains("shroom-dot") ||
+        image.classList.contains("shroom-sm")
+      ) {
+        return;
+      }
+
       image.classList.add("pynmon-screenshot", "lightbox-target");
 
       if (

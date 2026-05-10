@@ -109,6 +109,16 @@ More in the [Usage Guide](https://docs.pynenc.org/en/latest/usage_guide/index.ht
 
 **Invocation state machine** — Every task call becomes an invocation moving through `REGISTERED → PENDING → RUNNING → SUCCESS/FAILED`. Transitions are enforced; each change is recorded with timestamps and ownership metadata.
 
+The full graph is detailed because it carries real execution rules: orange states are runner-owned, blue recovery states can override dead ownership and reroute work, green states are available for runners again, and grey states are final.
+
+<div class="pynmon-showcase" markdown="1">
+
+<img src="/assets/img/shared/invocation-state-machine-2026-05-09.png" alt="Invocation status state machine generated from pynenc.invocation.status showing ownership, recovery override, concurrency control, and final states" class="pynmon-screenshot lightbox-target">
+
+</div>
+
+For the design reasoning behind those states, read [Why pynenc uses an invocation state machine](/2026-05-09-why-pynenc-uses-an-invocation-state-machine/).
+
 **Recovery** — Runners emit heartbeats. A background atomic service detects dead runners and invocations stuck beyond configured thresholds. Orphaned work is reclaimed under a distributed lock and re-queued transparently<img class="shroom-dot" src="/assets/img/shared/pynenc_logo.png" alt="">
 
 **Workflows** — Multi-step workflows with result persistence. On replay, completed steps are skipped; failed workflows resume from the last checkpoint, not from the start.

@@ -47,33 +47,6 @@ Task A waits on B, B waits on C, all workers blocked. **Pynenc's orchestrator pa
 
 <div class="shroom-divider"><img src="/assets/img/shared/pynenc_logo.png" alt="~"></div>
 
-
-## What Pynenc solves
-
-### 1. Tasks disappear when workers crash
-
-**Pynenc tracks every invocation through a strict state machine** with ownership semantics and runner heartbeats. Dead runners are detected automatically; orphaned invocations are reclaimed and re-routed<img class="shroom-dot" src="/assets/img/shared/pynenc_logo.png" alt="">
-
-### 2. Duplicate work runs in parallel
-
-**Built-in concurrency control** with four modes: `DISABLED`, `TASK` (one per task), `ARGUMENTS` (one per unique args), `KEYS` (one per arbitrary key). Duplicates are rejected before reaching a worker<img class="shroom-dot" src="/assets/img/shared/pynenc_logo.png" alt="">
-
-### 3. Dependencies deadlock your workers
-
-Task A waits on B, B waits on C, all workers blocked. **Pynenc's orchestrator pauses waiting tasks to free their slots**, then **prioritizes by dependency count** — the task blocking the most others runs first. Dependency chains resolve without holding threads hostage<img class="shroom-dot" src="/assets/img/shared/pynenc_logo.png" alt="">
-
-### 4. Failures are impossible to debug
-
-**Pynmon** (built-in monitoring UI) provides SVG timelines showing when each invocation started, paused, resumed, and finished across all runners. Family trees show parent-child relationships. The log explorer turns raw logs into clickable cross-references.
-
-<img src="/assets/img/shared/pynmon_timeline.png" alt="Pynmon execution timeline showing task execution across multiple runners with status transitions" class="pynmon-screenshot lightbox-target">
-
-### 5. Switching backends requires rewriting code
-
-**Plugin architecture.** Core ships with memory and SQLite. Redis, MongoDB, and RabbitMQ install as separate packages. Swap by config, not code<img class="shroom-dot" src="/assets/img/shared/pynenc_logo.png" alt="">
-
-<div class="shroom-divider"><img src="/assets/img/shared/pynenc_logo.png" alt="~"></div>
-
 ## Quick start
 
 ```bash

@@ -66,7 +66,7 @@ result = add(1, 2).result  # 3
 ```
 
 ```bash
-pynenc --app=tasks.app runner start
+pynenc runner start
 ```
 
 <div class="disclaimer-box">
@@ -163,7 +163,7 @@ app = (
 A built-in web UI that gives real-time visibility into every invocation, runner, and workflow — no external tooling required.
 
 ```bash
-pynenc --app=tasks.app monitor --host 0.0.0.0 --port 8000
+pynenc monitor
 ```
 
 <div class="pynmon-showcase" markdown="1">
@@ -188,6 +188,12 @@ Paste your log lines and the Log Explorer augments them with full context — pa
 
 <img src="/assets/img/shared/pynmon_log_explorer.png" alt="Pynmon Log Explorer parsing log lines with augmented context, mini-timeline, and links" class="pynmon-screenshot lightbox-target">
 
+### Event Monitoring
+
+Follow emitted events through matched conditions, trigger runs, and the invocations they start on the execution timeline.
+
+<img src="/assets/img/posts/2026-06-06-declarative-event-driven-tasks-in-python-03-event-driven-pubsub.png" alt="Pynmon timeline showing emitted events and the task invocations they trigger" class="pynmon-screenshot lightbox-target">
+
 </div>
 
 ## Trigger system
@@ -195,10 +201,29 @@ Paste your log lines and the Log Explorer augments them with full context — pa
 Tasks can start automatically based on cron schedules, custom events, or the outcome
 of other tasks. Triggers compose with AND/OR logic for complex automation flows<img class="shroom-dot" src="/assets/img/shared/pynenc_logo.png" alt="">
 
-```python
-trigger = app.trigger.on_success(process_data).run(notify_admin)
+e.g. `notify_subscribers` chains on `enrich_article` SUCCESS, but only when the
+upstream call had `kind="breaking_news"`:
 
-scheduled = app.trigger.on_cron("*/30 * * * *").run(process_data, ...)
+```python
+@app.task(
+    triggers=TriggerBuilder()
+    .on_status(
+        enrich_article,
+        statuses=[InvocationStatus.SUCCESS],
+        call_arguments={"kind": "breaking_news"},
+    )
+    .with_args_from_status(_args_from_enrich_status),
+)
+def notify_subscribers(article_id: str) -> str: ...
+```
+
+e.g. alert_editorial when task enrich_article fails with exception type `EnrichmentError`
+```python
+@app.task(
+    triggers=TriggerBuilder()
+    .on_exception(enrich_article, exception_types="EnrichmentError")
+)
+def alert_editorial(article_id: str, error: str) -> str: ...
 ```
 
 <div class="shroom-divider"><img src="/assets/img/shared/pynenc_logo.png" alt="~"></div>

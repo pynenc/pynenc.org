@@ -77,7 +77,6 @@ coordination styles:
 - `archive_old_content` — pure cron
 - `poll_target` — one invocation observed by the comparison tasks
 - `polling_tasks` — repeatedly reads `poll_target`'s durable status
-- `wait_result_tasks` — waits through the invocation result API
 - `reactive_tasks` — starts from `poll_target`'s SUCCESS condition
 
 The whole story fits in `tasks.py`. No DAG file, no separate scheduler
